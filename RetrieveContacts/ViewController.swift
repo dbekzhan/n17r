@@ -13,17 +13,11 @@ protocol didSelectElementDelegate {
     func didSelectItem(element: ContactCell)
 }
 
-//- async tableview reload
-// -why favoritable pictures are shifting after beinf reopened
-
 
 class ViewController: UITableViewController {
     
     let cellId = "cellId"
     var showIndexPath = false
-//    let aNames = ["Asuma", "Akatsuki"]
-//    let bNames = ["Boruto", "Boruto's dad", "Byakugan"]
-//    let cNames = ["Choji", "Carl"]
     
     // Two dimensional array for sections and rows in table view
     // Contact - class defined in Model, i.e. ExpandableSection file
@@ -37,7 +31,6 @@ class ViewController: UITableViewController {
     //    ]
     
     
-    //!!! Something with async reload of tableview -- look for information
     private func fetchContacts() {
         
         let store = CNContactStore()
@@ -191,7 +184,7 @@ class ViewController: UITableViewController {
     }
 }
 
-// find the reason of shifting selected items
+// Conform to a protocol 
 extension ViewController: didSelectElementDelegate {
     func didSelectItem(element: ContactCell) {
         guard let indexPath = tableView.indexPath(for: element) else { return }
