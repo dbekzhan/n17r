@@ -11,21 +11,17 @@ import FirebaseAuth
 import FirebaseFirestore
 
 
-// Inner storage for auto-fill and redirection
-// Based on selected user type -- provide valid interface and functionality
-
-// based on selectedindex, retrieve data from realm
-
+// protocol determining main features of any class that handles authentication 
 protocol Authenticator {
-    
+    // database link 
     var db: Firestore { get set }
-    
+    // type of the user 
     var typeIndex: Int { get set }
-    
+   
     func signUpUser(userName: String, email: String, password: String) -> Bool
     func signInUser(userName: String, email: String, password: String) -> Bool
 }
-
+// Enum cases used for convenient chaining 
 enum AuthType: String {
     case signIn = "Sign In"
     case signUp = "Sign Up"
@@ -41,7 +37,7 @@ enum UserType: String {
 
 // MARK:- Firebase Authentication Handler
 class AuthenticationViewModel: Authenticator {
-    
+    // database link 
     var db = Firestore.firestore()
     
     func createUserInUsersCollection(userName: String, uid: String) -> Bool {
@@ -52,13 +48,13 @@ class AuthenticationViewModel: Authenticator {
             if let err = err {
                 print(err.localizedDescription)
             } else {
-                print("successfully created user")
+                // successfully created user 
                 result = true
             }
         }
         return result
     }
-    
+     
     func signUpUser(userName: String, email: String, password: String) -> Bool {
         var result = false
         
@@ -69,6 +65,7 @@ class AuthenticationViewModel: Authenticator {
             }
             
             if let uid = user?.uid {
+                // create entity with uid as a primary key 
                 self.db.collection("entities").document(uid).setData(["email" : email, "password": password], options: SetOptions.merge(), completion: { (storeError) in
                     if let err = storeError {
                         print(err.localizedDescription)
@@ -98,11 +95,11 @@ class AuthenticationViewModel: Authenticator {
 
 // MARK:- Authentication Actions
 extension AuthenticationViewController {
-    
+    // action called by authentication button in the viewcontroller 
     @objc func handleAuthentification(sender: UIButton) {
-        
+        // retrieve current user type based on selectedindex of segmentedcontrol 
         guard let userTitle = switchUserTypeSegmentedControl.titleForSegment(at: switchUserTypeSegmentedControl.selectedSegmentIndex) else { return }
-        
+        // enum instance of UserType based on retrieved title 
         guard let userType = UserType(rawValue: userTitle) else { return }
         
         print(userType.rawValue)
@@ -121,6 +118,7 @@ extension AuthenticationViewController {
                 }
                 
                 if success {
+                    // save logged users in standards defaults for future convenience - avoid unwanted repeatitions of authentication
                     UserDefaults.standard.set(true, forKey: "isUserLoggedIn")
                     self.present(MainTabBarController(), animated: true, completion: nil)
                 }
@@ -129,8 +127,7 @@ extension AuthenticationViewController {
     }
 }
 
-// MARK:- Text Fields Input Validation
-
+// MARK:- Text Fields' Input Validation
 public class Validation: NSObject {
     static let shared = Validation()
     
@@ -212,7 +209,7 @@ public class Validation: NSObject {
         return result
     }
     
-    // Validation cases
+    // MARK: - Validation cases - for convenience 
     enum ValidationResult {
         case success
         case failure(Alert, AlertMessages)
@@ -223,8 +220,7 @@ public class Validation: NSObject {
         case password
         case userName
     }
-    
-    // check password validation
+    // password validation regular expressions 
     enum RegEx: String {
         case email = "^(?:(?:(?:(?: )*(?:(?:(?:\\t| )*\\r\\n)?(?:\\t| )+))+(?: )*)|(?: )+)?(?:(?:(?:[-A-Za-z0-9!#$%&’*+/=?^_'{|}~]+(?:\\.[-A-Za-z0-9!#$%&’*+/=?^_'{|}~]+)*)|(?:\"(?:(?:(?:(?: )*(?:(?:[!#-Z^-~]|\\[|\\])|(?:\\\\(?:\\t|[ -~]))))+(?: )*)|(?: )+)\"))(?:@)(?:(?:(?:[A-Za-z0-9](?:[-A-Za-z0-9]{0,61}[A-Za-z0-9])?)(?:\\.[A-Za-z0-9](?:[-A-Za-z0-9]{0,61}[A-Za-z0-9])?)*)|(?:\\[(?:(?:(?:(?:(?:[0-9]|(?:[1-9][0-9])|(?:1[0-9][0-9])|(?:2[0-4][0-9])|(?:25[0-5]))\\.){3}(?:[0-9]|(?:[1-9][0-9])|(?:1[0-9][0-9])|(?:2[0-4][0-9])|(?:25[0-5]))))|(?:(?:(?: )*[!-Z^-~])*(?: )*)|(?:[Vv][0-9A-Fa-f]+\\.[-A-Za-z0-9._~!$&'()*+,;=:]+))\\])))(?:(?:(?:(?: )*(?:(?:(?:\\t| )*\\r\\n)?(?:\\t| )+))+(?: )*)|(?: )+)?$"
         case password = "^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])(?=.*[a-z])[a-zA-Z0-9!?].{8,16}$"
@@ -236,7 +232,7 @@ public class Validation: NSObject {
         case failure
         case error
     }
-    
+    // messages for textfields' placeholders, and warning labels' messages 
     enum AlertMessages: String {
         
         case defaultEmail = "example@gmail.com"
